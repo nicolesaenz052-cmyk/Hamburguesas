@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control de Hamburguesas</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --naranja: #FF6B2B;
+    --naranja-claro: #FF8F5E;
+    --crema: #FFF8F3;
+    --verde: #2DB87C;
+    --verde-claro: #E6F9F1;
+    --rojo: #E84040;
+    --rojo-claro: #FDEAEA;
+    --azul: #3B82F6;
+    --gris: #6B7280;
+    --gris-claro: #F3F4F6;
+    --blanco: #FFFFFF;
+    --sombra: 0 4px 20px rgba(0,0,0,0.08);
+    --sombra-fuerte: 0 8px 30px rgba(0,0,0,0.14);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--crema);
+    min-height: 100vh;
+    color: #1F2937;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--naranja);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 16px rgba(255,107,43,0.3);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  header h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -0.5px;
+  }
+  header span { font-size: 1.5rem; }
+  #reloj {
+    font-family: 'Sora', sans-serif;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.85);
+    font-weight: 600;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    background: white;
+    border-bottom: 2px solid #F3F4F6;
+    position: sticky;
+    top: 64px;
+    z-index: 90;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 14px 8px;
+    border: none;
+    background: transparent;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--gris);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+  }
+  .tab-btn.active {
+    color: var(--naranja);
+    border-bottom-color: var(--naranja);
+    background: rgba(255,107,43,0.04);
+  }
+  .tab-btn .badge {
+    background: var(--naranja);
+    color: white;
+    font-size: 0.65rem;
+    padding: 1px 6px;
+    border-radius: 99px;
+    font-weight: 800;
+  }
+  .tab-btn.active .badge { background: var(--naranja); }
+
+  /* PANEL CONTENT */
+  .panel { display: none; padding: 16px; }
+  .panel.active { display: block; }
+
+  /* RESUMEN CARDS */
+  .cards-resumen {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .card-r {
+    background: white;
+    border-radius: 14px;
+    padding: 14px 10px;
+    text-align: center;
+    box-shadow: var(--sombra);
+  }
+  .card-r .num {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .card-r .label {
+    font-size: 0.68rem;
+    color: var(--gris);
+    font-weight: 600;
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .card-r.naranja .num { color: var(--naranja); }
+  .card-r.verde .num { color: var(--verde); }
+  .card-r.rojo .num { color: var(--rojo); }
+
+  /* FORM COCINA */
+  .seccion-titulo {
+    font-family: 'Sora', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gris);
+    margin-bottom: 10px;
+  }
+
+  .form-cocina {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: var(--sombra);
+    margin-bottom: 16px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .input-row input, .input-row select {
+    flex: 1;
+    padding: 11px 14px;
+    border: 2px solid #E5E7EB;
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border 0.2s;
+    color: #1F2937;
+    background: var(--gris-claro);
+  }
+  .input-row input:focus, .input-row select:focus {
+    border-color: var(--naranja);
+    background: white;
+  }
+  .input-row input[type="number"] { max-width: 80px; flex: none; }
+
+  .btn-primary {
+    width: 100%;
+    padding: 13px;
+    background: var(--naranja);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(255,107,43,0.35);
+  }
+  .btn-primary:hover { background: var(--naranja-claro); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+
+  /* LISTA DE SALIDAS */
+  .lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .item-cocina {
+    background: white;
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--sombra);
+    animation: slideIn 0.25s ease;
+    border-left: 4px solid var(--naranja);
+  }
+  .item-cocina .numero {
+    background: var(--naranja);
+    color: white;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 800;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .item-cocina .info { flex: 1; min-width: 0; }
+  .item-cocina .nombre {
+    font-weight: 700;
+    font-size: 0.92rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .item-cocina .hora {
+    font-size: 0.72rem;
+    color: var(--gris);
+  }
+  .item-cocina .cant {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--naranja);
+    flex-shrink: 0;
+  }
+  .item-cocina .btn-eliminar {
+    background: var(--rojo-claro);
+    color: var(--rojo);
+    border: none;
+    border-radius: 8px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .item-cocina .btn-eliminar:hover { background: var(--rojo); color: white; }
+
+  /* PAGOS */
+  .item-pago {
+    background: white;
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: var(--sombra);
+    animation: slideIn 0.25s ease;
+    border-left: 4px solid var(--verde);
+  }
+
+  .pago-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .pago-num {
+    background: var(--verde);
+    color: white;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 800;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .pago-nombre {
+    font-weight: 700;
+    font-size: 0.92rem;
+    flex: 1;
+  }
+  .pago-hora {
+    font-size: 0.72rem;
+    color: var(--gris);
+  }
+  .pago-detalle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--verde-claro);
+    border-radius: 8px;
+    padding: 8px 12px;
+  }
+  .pago-desc { font-size: 0.8rem; color: #374151; }
+  .pago-monto {
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    color: var(--verde);
+    font-size: 1rem;
+  }
+  .pago-estado {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-top: 6px;
+  }
+  .pago-estado.completo { background: var(--verde-claro); color: var(--verde); }
+  .pago-estado.parcial { background: #FEF3C7; color: #D97706; }
+
+  /* FORM PAGO */
+  .form-pago {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: var(--sombra);
+    margin-bottom: 16px;
+  }
+  .form-pago label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--gris);
+    display: block;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .form-pago input, .form-pago select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 2px solid #E5E7EB;
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border 0.2s;
+    color: #1F2937;
+    background: var(--gris-claro);
+    margin-bottom: 10px;
+  }
+  .form-pago input:focus, .form-pago select:focus {
+    border-color: var(--verde);
+    background: white;
+  }
+  .btn-verde {
+    width: 100%;
+    padding: 13px;
+    background: var(--verde);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(45,184,124,0.35);
+  }
+  .btn-verde:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* RESUMEN PANEL */
+  .resumen-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: var(--sombra);
+    margin-bottom: 14px;
+  }
+  .resumen-card h3 {
+    font-family: 'Sora', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    color: #1F2937;
+  }
+  .resumen-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #F3F4F6;
+    font-size: 0.88rem;
+  }
+  .resumen-fila:last-child { border-bottom: none; }
+  .resumen-fila .etiqueta { color: var(--gris); font-weight: 600; }
+  .resumen-fila .valor { font-family: 'Sora', sans-serif; font-weight: 800; }
+  .resumen-fila .valor.verde { color: var(--verde); }
+  .resumen-fila .valor.naranja { color: var(--naranja); }
+  .resumen-fila .valor.rojo { color: var(--rojo); }
+  .resumen-fila .valor.grande {
+    font-size: 1.3rem;
+    color: var(--verde);
+  }
+
+  .btn-exportar {
+    width: 100%;
+    padding: 13px;
+    background: #1F2937;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .btn-exportar:hover { background: #374151; }
+
+  .btn-limpiar {
+    width: 100%;
+    padding: 11px;
+    background: var(--rojo-claro);
+    color: var(--rojo);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-limpiar:hover { background: var(--rojo); color: white; }
+
+  /* VACIO */
+  .vacio {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--gris);
+  }
+  .vacio .emoji { font-size: 2.5rem; display: block; margin-bottom: 8px; }
+  .vacio p { font-size: 0.85rem; font-weight: 600; }
+
+  /* ANIMACION */
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1F2937;
+    color: white;
+    padding: 12px 22px;
+    border-radius: 99px;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🍔 Control de Hamburguesas</h1>
+    <div id="reloj"></div>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="cambiarTab('cocina')">
+    🍳 Cocina <span class="badge" id="badge-cocina">0</span>
+  </button>
+  <button class="tab-btn" onclick="cambiarTab('pagos')">
+    💰 Pagos <span class="badge" id="badge-pagos">0</span>
+  </button>
+  <button class="tab-btn" onclick="cambiarTab('resumen')">
+    📊 Resumen
+  </button>
+</div>
+
+<!-- ======= PANEL COCINA ======= -->
+<div class="panel active" id="panel-cocina">
+  <!-- cards resumen -->
+  <div class="cards-resumen" style="margin-top:16px">
+    <div class="card-r naranja">
+      <div class="num" id="total-salidas">0</div>
+      <div class="label">Salidas</div>
+    </div>
+    <div class="card-r verde">
+      <div class="num" id="total-porciones">0</div>
+      <div class="label">Hamburguesas</div>
+    </div>
+    <div class="card-r rojo">
+      <div class="num" id="pendientes-pago">0</div>
+      <div class="label">Sin pagar</div>
+    </div>
+  </div>
+
+  <!-- Precio fijo info -->
+  <div style="background:linear-gradient(135deg,#FF6B2B,#FF8F5E);border-radius:14px;padding:12px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 14px rgba(255,107,43,0.3)">
+    <div>
+      <div style="font-family:'Sora',sans-serif;font-size:0.7rem;font-weight:700;color:rgba(255,255,255,0.8);text-transform:uppercase;letter-spacing:1px">Precio por hamburguesa</div>
+      <div style="font-family:'Sora',sans-serif;font-size:1.5rem;font-weight:800;color:white">₡ 15.000</div>
+      <div style="font-size:0.72rem;color:rgba(255,255,255,0.8);margin-top:2px">🍟 Incluye papitas y jugo</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-family:'Sora',sans-serif;font-size:0.7rem;font-weight:700;color:rgba(255,255,255,0.8);text-transform:uppercase;letter-spacing:1px">Total esperado</div>
+      <div style="font-family:'Sora',sans-serif;font-size:1.5rem;font-weight:800;color:white" id="total-esperado">₡ 0</div>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+  <div class="form-cocina">
+    <p class="seccion-titulo">Registrar salida de cocina</p>
+    <div class="input-row">
+      <input type="text" id="in-plato" placeholder="Nombre del cliente (opcional)" />
+      <input type="number" id="in-cant" value="1" min="1" max="99" />
+    </div>
+    <button class="btn-primary" onclick="agregarSalida()">+ Anotar hamburguesa que sale</button>
+  </div>
+
+  <!-- Lista -->
+  <p class="seccion-titulo">Lo que salió de cocina</p>
+  <div class="lista" id="lista-cocina">
+    <div class="vacio" id="vacio-cocina">
+      <span class="emoji">🍳</span>
+      <p>Aún no hay salidas registradas</p>
+    </div>
+  </div>
+</div>
+
+<!-- ======= PANEL PAGOS ======= -->
+<div class="panel" id="panel-pagos">
+  <div class="form-pago" style="margin-top:16px">
+    <p class="seccion-titulo">Registrar pago</p>
+    <label>¿Quién paga?</label>
+    <input type="text" id="in-pagador" placeholder="Nombre del cliente" />
+    <label>Cantidad de hamburguesas</label>
+    <input type="number" id="in-cant-pago" value="1" min="1" max="99" oninput="calcularMonto()" />
+    <label>Monto recibido <span style="color:var(--verde);font-size:0.75rem" id="label-esperado">(esperado: ₡ 15.000)</span></label>
+    <input type="number" id="in-monto" placeholder="₡ 0" min="0" step="500" />
+    <label>Método de pago</label>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="btn-efectivo" onclick="selMetodo('efectivo')" type="button" style="flex:1;padding:11px;border:2px solid var(--verde);border-radius:10px;font-family:'Sora',sans-serif;font-size:0.88rem;font-weight:700;background:var(--verde);color:white;cursor:pointer;transition:all 0.2s">💵 Efectivo</button>
+      <button id="btn-nequi" onclick="selMetodo('nequi')" type="button" style="flex:1;padding:11px;border:2px solid #E5E7EB;border-radius:10px;font-family:'Sora',sans-serif;font-size:0.88rem;font-weight:700;background:var(--gris-claro);color:var(--gris);cursor:pointer;transition:all 0.2s">📱 Nequi</button>
+    </div>
+    <input type="hidden" id="in-metodo" value="efectivo" />
+    <button class="btn-verde" onclick="agregarPago()">✓ Registrar pago</button>
+  </div>
+
+  <p class="seccion-titulo">Pagos recibidos</p>
+  <div class="lista" id="lista-pagos">
+    <div class="vacio" id="vacio-pagos">
+      <span class="emoji">💰</span>
+      <p>Aún no hay pagos registrados</p>
+    </div>
+  </div>
+</div>
+
+<!-- ======= PANEL RESUMEN ======= -->
+<div class="panel" id="panel-resumen">
+  <div style="margin-top:16px">
+    <div class="resumen-card">
+      <h3>🍔 Cocina</h3>
+      <div class="resumen-fila">
+        <span class="etiqueta">Total salidas registradas</span>
+        <span class="valor naranja" id="r-salidas">0</span>
+      </div>
+      <div class="resumen-fila">
+        <span class="etiqueta">Total hamburguesas servidas</span>
+        <span class="valor naranja" id="r-porciones">0</span>
+      </div>
+      <div class="resumen-fila">
+        <span class="etiqueta">Total esperado (₡15.000 c/u)</span>
+        <span class="valor naranja" id="r-esperado">₡ 0</span>
+      </div>
+    </div>
+    <div class="resumen-card">
+      <h3>💰 Caja</h3>
+      <div class="resumen-fila">
+        <span class="etiqueta">Pagos registrados</span>
+        <span class="valor verde" id="r-num-pagos">0</span>
+      </div>
+      <div class="resumen-fila">
+        <span class="etiqueta">Pagos completos</span>
+        <span class="valor verde" id="r-completos">0</span>
+      </div>
+      <div class="resumen-fila">
+        <span class="etiqueta">Pagos parciales / abonos</span>
+        <span class="valor" style="color:#D97706" id="r-parciales">0</span>
+      </div>
+      <div class="resumen-fila">
+        <span class="etiqueta">💵 Total recaudado</span>
+        <span class="valor grande" id="r-total">₡ 0</span>
+      </div>
+      <div class="resumen-fila">
+        <span class="etiqueta">⚠️ Falta por cobrar</span>
+        <span class="valor rojo" id="r-faltante">₡ 0</span>
+      </div>
+    </div>
+
+    <!-- CARD MÉTODOS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div style="background:white;border-radius:14px;padding:14px;box-shadow:var(--sombra);border-top:4px solid var(--verde)">
+        <div style="font-size:1.3rem;margin-bottom:4px">💵</div>
+        <div style="font-family:'Sora',sans-serif;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gris)">Efectivo</div>
+        <div style="font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:800;color:var(--verde);margin-top:2px" id="r-efectivo">₡ 0</div>
+        <div style="font-size:0.72rem;color:var(--gris);margin-top:2px" id="r-efectivo-count">0 pagos</div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:14px;box-shadow:var(--sombra);border-top:4px solid #8B5CF6">
+        <div style="font-size:1.3rem;margin-bottom:4px">📱</div>
+        <div style="font-family:'Sora',sans-serif;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gris)">Nequi</div>
+        <div style="font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:800;color:#8B5CF6;margin-top:2px" id="r-nequi">₡ 0</div>
+        <div style="font-size:0.72rem;color:var(--gris);margin-top:2px" id="r-nequi-count">0 pagos</div>
+      </div>
+    </div>
+
+    <div class="resumen-card" id="card-detalle-pagos">
+      <h3>📋 Detalle de pagos</h3>
+      <div id="detalle-lista"></div>
+    </div>
+
+    <button class="btn-exportar" onclick="exportarTexto()">📋 Copiar resumen completo</button>
+    <button class="btn-limpiar" onclick="limpiarTodo()">🗑️ Limpiar todo y empezar de nuevo</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const PRECIO = 15000;
+  let salidas = JSON.parse(localStorage.getItem('salidas') || '[]');
+  let pagos = JSON.parse(localStorage.getItem('pagos') || '[]');
+
+  // RELOJ
+  function actualizarReloj() {
+    const ahora = new Date();
+    document.getElementById('reloj').textContent = ahora.toLocaleTimeString('es-CR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  }
+  setInterval(actualizarReloj, 1000);
+  actualizarReloj();
+
+  // TABS
+  function cambiarTab(tab) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + tab).classList.add('active');
+    event.currentTarget.classList.add('active');
+    if (tab === 'resumen') actualizarResumen();
+  }
+
+  // GUARDAR
+  function guardar() {
+    localStorage.setItem('salidas', JSON.stringify(salidas));
+    localStorage.setItem('pagos', JSON.stringify(pagos));
+  }
+
+  // HORA
+  function horaActual() {
+    return new Date().toLocaleTimeString('es-CR', {hour:'2-digit', minute:'2-digit'});
+  }
+
+  // FORMATO COLONES
+  function fmtColones(n) {
+    return '₡ ' + n.toLocaleString('es-CR');
+  }
+
+  // TOAST
+  function mostrarToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // Calcula monto esperado al cambiar cantidad en pagos
+  function calcularMonto() {
+    const cant = parseInt(document.getElementById('in-cant-pago').value) || 1;
+    const esperado = cant * PRECIO;
+    document.getElementById('label-esperado').textContent = `(esperado: ${fmtColones(esperado)})`;
+    document.getElementById('in-monto').value = esperado;
+  }
+
+  /* ===== COCINA ===== */
+  function agregarSalida() {
+    const plato = document.getElementById('in-plato').value.trim() || 'Cliente';
+    const cant = parseInt(document.getElementById('in-cant').value) || 1;
+
+    salidas.push({ id: Date.now(), plato, cant, hora: horaActual() });
+    guardar();
+    renderCocina();
+    document.getElementById('in-plato').value = '';
+    document.getElementById('in-cant').value = 1;
+    mostrarToast('✅ Frijolada(s) anotada(s)');
+    document.getElementById('in-plato').focus();
+  }
+
+  function eliminarSalida(id) {
+    salidas = salidas.filter(s => s.id !== id);
+    guardar();
+    renderCocina();
+    mostrarToast('🗑️ Eliminado');
+  }
+
+  function renderCocina() {
+    const lista = document.getElementById('lista-cocina');
+    const vacio = document.getElementById('vacio-cocina');
+    const totalSalidas = salidas.length;
+    const totalPorciones = salidas.reduce((a, s) => a + s.cant, 0);
+    const totalPagadas = pagos.reduce((a, p) => a + (p.cant || 1), 0);
+    const pendientes = Math.max(0, totalPorciones - totalPagadas);
+
+    document.getElementById('total-salidas').textContent = totalSalidas;
+    document.getElementById('total-porciones').textContent = totalPorciones;
+    document.getElementById('badge-cocina').textContent = totalSalidas;
+    document.getElementById('pendientes-pago').textContent = pendientes;
+    document.getElementById('total-esperado').textContent = fmtColones(totalPorciones * PRECIO);
+
+    if (salidas.length === 0) {
+      vacio.style.display = 'block';
+      lista.querySelectorAll('.item-cocina').forEach(i => i.remove());
+      return;
+    }
+    vacio.style.display = 'none';
+    lista.querySelectorAll('.item-cocina').forEach(i => i.remove());
+
+    [...salidas].reverse().forEach((s, idx) => {
+      const el = document.createElement('div');
+      el.className = 'item-cocina';
+      const subtotal = fmtColones(s.cant * PRECIO);
+      el.innerHTML = `
+        <div class="numero">${salidas.length - idx}</div>
+        <div class="info">
+          <div class="nombre">${s.plato}</div>
+          <div class="hora">🕐 ${s.hora} · ${subtotal}</div>
+        </div>
+        <div class="cant">×${s.cant}</div>
+        <button class="btn-eliminar" onclick="eliminarSalida(${s.id})">✕</button>
+      `;
+      lista.appendChild(el);
+    });
+  }
+
+  // Selección método de pago
+  function selMetodo(metodo) {
+    document.getElementById('in-metodo').value = metodo;
+    const btnEfectivo = document.getElementById('btn-efectivo');
+    const btnNequi = document.getElementById('btn-nequi');
+    if (metodo === 'efectivo') {
+      btnEfectivo.style.background = 'var(--verde)';
+      btnEfectivo.style.color = 'white';
+      btnEfectivo.style.borderColor = 'var(--verde)';
+      btnNequi.style.background = 'var(--gris-claro)';
+      btnNequi.style.color = 'var(--gris)';
+      btnNequi.style.borderColor = '#E5E7EB';
+    } else {
+      btnNequi.style.background = '#8B5CF6';
+      btnNequi.style.color = 'white';
+      btnNequi.style.borderColor = '#8B5CF6';
+      btnEfectivo.style.background = 'var(--gris-claro)';
+      btnEfectivo.style.color = 'var(--gris)';
+      btnEfectivo.style.borderColor = '#E5E7EB';
+    }
+  }
+
+  /* ===== PAGOS ===== */
+  function agregarPago() {
+    const pagador = document.getElementById('in-pagador').value.trim();
+    const cant = parseInt(document.getElementById('in-cant-pago').value) || 1;
+    const monto = parseFloat(document.getElementById('in-monto').value) || 0;
+    const metodo = document.getElementById('in-metodo').value;
+
+    if (!pagador) { mostrarToast('⚠️ Escribe el nombre del cliente'); return; }
+    if (monto <= 0) { mostrarToast('⚠️ Ingresa el monto recibido'); return; }
+
+    const esperado = cant * PRECIO;
+    const estadoFinal = monto >= esperado ? 'completo' : 'parcial';
+
+    pagos.push({ id: Date.now(), pagador, cant, monto, esperado, estado: estadoFinal, metodo, hora: horaActual() });
+    guardar();
+    renderPagos();
+    renderCocina();
+    document.getElementById('in-pagador').value = '';
+    document.getElementById('in-cant-pago').value = 1;
+    document.getElementById('in-monto').value = '';
+    document.getElementById('label-esperado').textContent = `(esperado: ₡ 15.000)`;
+    selMetodo('efectivo');
+    mostrarToast('💰 Pago registrado');
+    document.getElementById('in-pagador').focus();
+  }
+
+  function renderPagos() {
+    const lista = document.getElementById('lista-pagos');
+    const vacio = document.getElementById('vacio-pagos');
+    document.getElementById('badge-pagos').textContent = pagos.length;
+
+    if (pagos.length === 0) {
+      vacio.style.display = 'block';
+      lista.querySelectorAll('.item-pago').forEach(i => i.remove());
+      return;
+    }
+    vacio.style.display = 'none';
+    lista.querySelectorAll('.item-pago').forEach(i => i.remove());
+
+    [...pagos].reverse().forEach((p, idx) => {
+      const el = document.createElement('div');
+      el.className = 'item-pago';
+      const metodoBadge = p.metodo === 'nequi'
+        ? `<span style="background:#F3EEFF;color:#8B5CF6;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:99px;margin-left:6px">📱 Nequi</span>`
+        : `<span style="background:var(--verde-claro);color:var(--verde);font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:99px;margin-left:6px">💵 Efectivo</span>`;
+      const estadoClass = p.estado === 'completo' ? 'completo' : 'parcial';
+      const estadoLabel = p.estado === 'completo' ? '✅ Pago completo' : '⚠️ Pago parcial';
+      const faltaStr = p.estado === 'parcial' ? ` · Falta: ${fmtColones(p.esperado - p.monto)}` : '';
+      el.innerHTML = `
+        <div class="pago-header">
+          <div class="pago-num">${pagos.length - idx}</div>
+          <div class="pago-nombre">${p.pagador}${metodoBadge}</div>
+          <div class="pago-hora">🕐 ${p.hora}</div>
+        </div>
+        <div class="pago-detalle">
+          <span class="pago-desc">${p.cant} hamburguesa${p.cant > 1 ? 's' : ''}${faltaStr}</span>
+          <span class="pago-monto">${fmtColones(p.monto)}</span>
+        </div>
+        <span class="pago-estado ${estadoClass}">${estadoLabel}</span>
+      `;
+      lista.appendChild(el);
+    });
+  }
+
+  /* ===== RESUMEN ===== */
+  function actualizarResumen() {
+    const totalPorciones = salidas.reduce((a, s) => a + s.cant, 0);
+    const totalEsperado = totalPorciones * PRECIO;
+    const totalRecaudado = pagos.reduce((a, p) => a + p.monto, 0);
+    const faltante = Math.max(0, totalEsperado - totalRecaudado);
+    const completos = pagos.filter(p => p.estado === 'completo').length;
+    const parciales = pagos.filter(p => p.estado === 'parcial').length;
+
+    document.getElementById('r-salidas').textContent = salidas.length;
+    document.getElementById('r-porciones').textContent = totalPorciones;
+    document.getElementById('r-esperado').textContent = fmtColones(totalEsperado);
+    document.getElementById('r-num-pagos').textContent = pagos.length;
+    document.getElementById('r-completos').textContent = completos;
+    document.getElementById('r-parciales').textContent = parciales;
+    document.getElementById('r-total').textContent = fmtColones(totalRecaudado);
+    document.getElementById('r-faltante').textContent = fmtColones(faltante);
+
+    const totalEfectivo = pagos.filter(p => p.metodo !== 'nequi').reduce((a, p) => a + p.monto, 0);
+    const countEfectivo = pagos.filter(p => p.metodo !== 'nequi').length;
+    const totalNequi = pagos.filter(p => p.metodo === 'nequi').reduce((a, p) => a + p.monto, 0);
+    const countNequi = pagos.filter(p => p.metodo === 'nequi').length;
+
+    document.getElementById('r-efectivo').textContent = fmtColones(totalEfectivo);
+    document.getElementById('r-efectivo-count').textContent = `${countEfectivo} pago${countEfectivo !== 1 ? 's' : ''}`;
+    document.getElementById('r-nequi').textContent = fmtColones(totalNequi);
+    document.getElementById('r-nequi-count').textContent = `${countNequi} pago${countNequi !== 1 ? 's' : ''}`;
+
+    const det = document.getElementById('detalle-lista');
+    det.innerHTML = '';
+    if (pagos.length === 0) {
+      det.innerHTML = '<p style="color:#9CA3AF;font-size:0.82rem;text-align:center;padding:12px 0">Sin pagos aún</p>';
+    } else {
+      pagos.forEach((p, i) => {
+        const row = document.createElement('div');
+        row.className = 'resumen-fila';
+        const metodoBadgeR = p.metodo === 'nequi' ? ' 📱' : ' 💵';
+        const color = p.estado === 'completo' ? 'color:var(--verde)' : 'color:#D97706';
+        const icono = p.estado === 'completo' ? '✅' : '⚠️';
+        row.innerHTML = `
+          <span class="etiqueta">${icono} ${p.pagador}${metodoBadgeR} ×${p.cant} <span style="font-weight:400">(${p.hora})</span></span>
+          <span class="valor" style="${color}">${fmtColones(p.monto)}</span>
+        `;
+        det.appendChild(row);
+      });
+    }
+  }
+
+  /* ===== EXPORTAR ===== */
+  function exportarTexto() {
+    const fecha = new Date().toLocaleDateString('es-CR');
+    const hora = new Date().toLocaleTimeString('es-CR', {hour:'2-digit', minute:'2-digit'});
+    const totalPorciones = salidas.reduce((a, s) => a + s.cant, 0);
+    const totalEsperado = totalPorciones * PRECIO;
+    const totalRecaudado = pagos.reduce((a, p) => a + p.monto, 0);
+    const faltante = Math.max(0, totalEsperado - totalRecaudado);
+
+    let texto = `🍔 FRIJOLADAS - ${fecha} ${hora}\n`;
+    texto += `${'─'.repeat(35)}\n`;
+    texto += `🍳 COCINA\n`;
+    texto += `  Hamburguesas servidas: ${totalPorciones}\n`;
+    texto += `  Total esperado: ${fmtColones(totalEsperado)}\n\n`;
+    texto += `  Detalle:\n`;
+    salidas.forEach((s, i) => {
+      texto += `  ${i+1}. ${s.plato} ×${s.cant} (${s.hora})\n`;
+    });
+    const totalEfectivo = pagos.filter(p => p.metodo !== 'nequi').reduce((a, p) => a + p.monto, 0);
+    const totalNequi = pagos.filter(p => p.metodo === 'nequi').reduce((a, p) => a + p.monto, 0);
+
+    texto += `\n💰 PAGOS\n`;
+    texto += `  Total recaudado: ${fmtColones(totalRecaudado)}\n`;
+    texto += `  💵 Efectivo: ${fmtColones(totalEfectivo)}\n`;
+    texto += `  📱 Nequi: ${fmtColones(totalNequi)}\n`;
+    texto += `  Falta por cobrar: ${fmtColones(faltante)}\n\n`;
+    pagos.forEach((p, i) => {
+      const est = p.estado === 'completo' ? '✅' : '⚠️';
+      const met = p.metodo === 'nequi' ? '📱' : '💵';
+      texto += `  ${i+1}. ${p.pagador} ×${p.cant} — ${fmtColones(p.monto)} ${est}${met} (${p.hora})\n`;
+    });
+    texto += `${'─'.repeat(35)}\n`;
+    texto += `TOTAL: ${fmtColones(totalRecaudado)} / ${fmtColones(totalEsperado)}`;
+
+    navigator.clipboard.writeText(texto).then(() => {
+      mostrarToast('📋 ¡Resumen copiado!');
+    }).catch(() => {
+      prompt('Copia este texto:', texto);
+    });
+  }
+
+  /* ===== LIMPIAR ===== */
+  function limpiarTodo() {
+    if (!confirm('¿Segura que quieres limpiar todo? Se borrarán todas las salidas y pagos.')) return;
+    salidas = [];
+    pagos = [];
+    guardar();
+    renderCocina();
+    renderPagos();
+    mostrarToast('🗑️ Todo limpio');
+  }
+
+  // Enter para agregar
+  document.getElementById('in-plato').addEventListener('keydown', e => {
+    if (e.key === 'Enter') agregarSalida();
+  });
+  document.getElementById('in-cant').addEventListener('keydown', e => {
+    if (e.key === 'Enter') agregarSalida();
+  });
+  document.getElementById('in-monto').addEventListener('keydown', e => {
+    if (e.key === 'Enter') agregarPago();
+  });
+
+  // Render inicial
+  renderCocina();
+  renderPagos();
+</script>
+</body>
+</html>
